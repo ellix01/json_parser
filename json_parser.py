@@ -45,10 +45,11 @@ class Report:
     def __init__(self, report):
         self.report = report
         self.overview = report['overview']
-        size = len(report['analysis_subjects'])
-        for i in range(1, size):
-            print(str(i))
-            self.analysis_subjects[i] = Subject(report['analysis_subjects'][i])
+        
+        x = 0
+        for anal in report['analysis_subjects']:
+            self.analysis_subjects.append(Subject(report['analysis_subjects'][x], x))
+            x += 1
         
     def subjectsSize(self):
         size = len(self.analysis_subjects)
@@ -57,26 +58,17 @@ class Report:
 
 class Subject: 
     
-    def __init__(self, subject):
-        """self.registry_reads = subject['registry_reads']
-        self.file_reads = subject['file_reads']
-        self.loaded_libraries = subject['loaded_libraries']
-        self.process = subject['process']
-        self.process_interactions = subject['process_interactions']
-        self.file_queries = subject['file_queries']
-        self.strings_lists = subject['strings_lists']
-        self.strings_lists = subject['strings_lists']
-        self.overview = subject['overview']
+    def __init__(self, subject, x):
+        self.subject = subject
+        self.registry_reads = subject['registry_reads']
+        self.id = x
         
-        if 'raised_exceptions' in subject['raised_exceptions']:
-            self.raised_exceptions = subject['raised_exceptions']
-        self.frequent_api_calls = subject['frequent_api_calls']
-        self.file_searches = subject['file_searches']
+        
         
     def readRegistries(self):
         for c in self.registry_reads:
             print(c)
-            print("\n")"""
+            print("\n")
         
         
         
@@ -86,5 +78,5 @@ class Subject:
         
         
 
-analyze = Json_Parser('C:/Users/esy2053/Documents/Lastline_report/ransom.json')
-analyze.report.subjectsSize()
+analyze = Json_Parser('//home//elisaveta//Dokumente//cryptowall.json')
+analyze.report.analysis_subjects[1].readRegistries()
