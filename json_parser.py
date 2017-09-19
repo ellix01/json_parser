@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Sep 17 21:21:59 2017
-
 @author: elisaveta
 """
 
@@ -60,23 +59,56 @@ class Subject:
     
     def __init__(self, subject, x):
         self.subject = subject
-        self.registry_reads = subject['registry_reads']
+        default = 'null'
+        self.registry_reads = subject.get('registry_reads', default)
+        self.file_reads = subject.get('file_reads', default)
+        self.loaded_libraries = subject.get('loaded_libraries', default)
+        self.process = subject.get('process', default)
+        self.process_interactions = subject.get('process_interactions', default)
+        self.memory_region_stages = subject.get('memory_region_stages', default)
+        self.file_queries = subject.get('file_queries', default)
+        self.registry_reads = subject.get('registry_reads', default)
+        self.registry_reads = subject.get('registry_reads', default)
+
         self.id = x
         
         
         
     def readRegistries(self):
         for c in self.registry_reads:
-            print(c)
+            default = 'null'
+            value = c.get('value', default)
+            key = c.get('key', default)
+            data = c.get('data', default)
+            print("value: " + value)
+            print("key: " + key)
+            print("data: " + data)
             print("\n")
+            
         
         
         
-        
-        
-        
-        
+    
         
 
-analyze = Json_Parser('//home//elisaveta//Dokumente//cryptowall.json')
+analyze = Json_Parser('C:/Users/esy2053/Documents/Lastline_report/ransom.json')
 analyze.report.analysis_subjects[1].readRegistries()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
