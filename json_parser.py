@@ -5,11 +5,35 @@ Created on Sun Sep 17 21:21:59 2017
 """
 
 import json
+import os
 
-class Json_Parser:
+
+class Analyzer:
+    
+    malware_samples = []
+    
+    def __init__(self, directory):
+        self.dirpath = directory
+        self.dir = os.listdir(directory)
+        for file in self.dir:
+            filepath = self.dirpath + "/" + file
+            self.malware_samples.append(Sample(filepath))
+            
+    def sortFiles(self):
+        for sample in self.malware_samples:
+            if sample.isMalware() != True:
+                print(sample.path)
+                
+        
+            
+            
+                        
+
+class Sample:
     
     
     def __init__(self, path):
+        self.path = path
         with open(path, 'r') as json_data :
             self.file = json.load(json_data)
             self.report = Report(self.file['report'])
@@ -35,6 +59,17 @@ class Json_Parser:
         for i in range(0,5):
             id = self.file['report']['analysis_subjects'][i]['overview']['id']
             print(id)
+            
+    def isMalware(self):
+        score = self.file['score']
+        if score < 40:
+            return False
+        else:
+            return True 
+        
+    
+        
+        
     
 
 class Report:
@@ -91,8 +126,26 @@ class Subject:
     
         
 
-analyze = Json_Parser('C:/Users/esy2053/Documents/Lastline_report/ransom.json')
-analyze.report.analysis_subjects[1].readRegistries()
+analyzer = Analyzer('C:/Users/esy2053/Documents/Lastline_report')
+analyzer.sortFiles()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
