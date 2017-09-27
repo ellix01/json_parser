@@ -5,14 +5,15 @@ Created on Sun Sep 17 21:21:59 2017
 """
 
 import json
+import re
 import os
 
 
 class Analyzer:
     
-    malware_samples = []
     
     def __init__(self, directory):
+        self.malware_samples = []
         self.dirpath = directory
         self.dir = os.listdir(directory)
         for file in self.dir:
@@ -24,8 +25,19 @@ class Analyzer:
             if sample.isMalware() != True:
                 print(sample.path)
                 
+    def IndiaktorUsedRegisry(self, registry):
+        for sample in self.malware_samples:
+            x = sample.report.checkReportForRegistry(registry)
+            if x:
+                return True
+            else:
+                continue
+        return False
         
+    
             
+    
+    
             
                         
 
@@ -67,16 +79,14 @@ class Sample:
         else:
             return True 
         
-    
-        
         
     
 
 class Report:
     
-    analysis_subjects = []
     
     def __init__(self, report):
+        self.analysis_subjects = []
         self.report = report
         self.overview = report['overview']
         
@@ -89,6 +99,25 @@ class Report:
         size = len(self.analysis_subjects)
         print(str(size))
         
+    def checkReportForRegistry(self, registry):
+        for subject in self.analysis_subjects:
+            if subject.checkSubjectForRegistry(registry):
+                return True
+            else:
+                continue
+        return False
+    
+    def checkReportSusFileWrites(self):
+        for subject in self.analysis_subjects:
+            if subject.checkSubjectSusFileWrites():
+                return True
+            else:
+                continue
+        return False
+    
+            
+        
+        
 
 class Subject: 
     
@@ -97,14 +126,13 @@ class Subject:
         default = 'null'
         self.registry_reads = subject.get('registry_reads', default)
         self.file_reads = subject.get('file_reads', default)
+        self.file_writes = subject.get('file_writes', default)
         self.loaded_libraries = subject.get('loaded_libraries', default)
         self.process = subject.get('process', default)
         self.process_interactions = subject.get('process_interactions', default)
         self.memory_region_stages = subject.get('memory_region_stages', default)
         self.file_queries = subject.get('file_queries', default)
-        self.registry_reads = subject.get('registry_reads', default)
-        self.registry_reads = subject.get('registry_reads', default)
-
+        self.registry_writes = subject.get('registry_writes', default)
         self.id = x
         
         
@@ -120,15 +148,64 @@ class Subject:
             print("data: " + data)
             print("\n")
             
+    def checkSubjectForRegistry(self, registry):
+        if self.registry_writes == 'null':
+            return False
+        for c in self.registry_writes:
+            default = 'null'
+            key = c.get('key', default)
+            if registry in key:
+                return True
+            else:
+                continue 
+        return False
+    
+    def checkSubjectSusFileWrites(self):
+        if self.file_writes == 'null': 
+            return False
+        for c in self.file_writes:
+            default = 'null'
+            filename = c.get('filename', default)
+            if suspiciousName(filename):
+                print(filename)
+                return True
+            else:
+                continue
+        return False 
+            
         
         
         
     
         
 
-analyzer = Analyzer('C:/Users/esy2053/Documents/Lastline_report')
-analyzer.sortFiles()
+#analyzer = Analyzer('C:/Users/esy2053/Documents/Lastline_report')
+#analyzer.IndiaktorUsedRegisry('CURRENTVERSION\RUN')
 
+#sample = Sample('C:/Users/esy2053/Documents/Lastline_report/data (2).json')
+#sample.report.checkReportForRegistry('CURRENTVERSION\RUN')
+#[a-zA-Z].*\d+.*[a-zA-Z]\.exe
+
+
+sample = Sample('C:/Users/esy2053/Documents/Lastline_report/data (2).json')
+x = sample.report.checkReportSusFileWrites()
+print(str(x))
+
+def suspiciousName(name):
+    if len(name) > 5:
+        if re.search(r".*\\[a-zA-Z].*\d+[a-zA-Z]+.*", name):
+            if '32' in name:
+                return False
+            return True
+        else:
+            return False
+
+
+        
+        
+#s = 'C:\\Windows'
+#x = suspiciousName(s)
+#print(str(x))
 
 
 
