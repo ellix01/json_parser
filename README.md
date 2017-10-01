@@ -57,3 +57,40 @@ windows Dateien werden verändert; Manifestdatetein auch
 
 
 HKU\S-1-5-21-1229272821-1563985344-1801674531-1003\SOFTWARE\MICROSOFT\WINDOWS\CURRENTVERSION\EXPLORER\ADVANCED	 Wert Hidden wird auf 2 gesetzt --> versteckte Dateien werden nicht mehr angezeigt 
+
+
+
+komische Dateien/Prozesse: 
+gestartet wurden: xpsp2res.dll, cryptsp.dll, ntoskrnl.exe, jqs.exe(vor allem, wenn sie aus unterordner des Benutzers gestartet wird)
+im Namen kommt doppelt .exe vor, viele Leerzeichen 
+Dateien von Windows werden nicht mit dem richtigen Pfad gestartet
+
+privilege escalation: 
+vssadmin.exe Delete Shadows /All /Quiet Befehl; 
+
+ransom: 
+1. in viele Dateien wurde geschrieben 
+
+
+sonstiges: 
+nach besonderen Dateien wurde gesucht: lsass.exe, cmd.exe usw 
+compilierter status sehr alt 
+bekannter Prozess wird erstellt und dann wurde reingeschrieben (Code Injection)
+es wird nach vielen Dateien gesucht, die keinen Path haben 
+Windows Dateien werden verändert; Manifestdatetein auch 
+
+
+veränderte Registries: 
+WINLOGON
+RUN
+RUNONCE
+MICROSOFT\WINDOWS\CURRENTVERSION\EXPLORER\ADVANCED Wert: Hidden: versteckte Dateien werden nicht mehr angezeigt 
+
+Indikatoren: 
+
+1. in verdächtig viele Dateien wurde geschrieben 
+2. verdächtige registries wurden geöffnet
+3. deleted Shadows with vssadmin.exe Delete Shadows /All /Quiet
+4. compilierter zeitpunkt sehr alt
+5. komische Prozesse wurden gestartetet: xpsp2res.dll, cryptsp.dll, ntoskrnl.exe, jqs.exe
+6. .exe kommt doppelt vor; name hat viele Leerzeichen 
