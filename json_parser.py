@@ -5,7 +5,6 @@ Created on Sun Sep 17 21:21:59 2017
 """
 
 import json
-import re
 import os
 
 
@@ -34,18 +33,65 @@ class Analyzer:
                 continue
         return False
         
-    
+    def Indikator1(self):
+        for sample in self.malware_samples:
+            print(sample.path)
+            x = 0
+            for subject in sample.report.analysis_subjects:
+                x += subject.indikatorOne()
+            if x > 30:
+                sample.Indikator1 = True
+            print(str(sample.Indikator1))
+                
+    def Indikator2(self):
+        registry = ['WINLOGON', 'RUN', 'RUNONCE', 'MICROSOFT\WINDOWS\CURRENTVERSION\EXPLORER\ADVANCED']
+        for sample in self.malware_samples:
+            print(sample.path)
+            for reg in registry:
+                x = sample.report.checkReportForRegistry(reg)
+                if x == True:
+                    sample.Indikator2 = x
+            print(str(sample.Indikator2))
+            
+            
+    def Indikator3(self):
+        for sample in self.malware_samples:
+            print(sample.path)
+            for subject in sample.report.analysis_subjects:
+                x = subject.indikatorThree('vssadmin.exe Delete Shadows /All /Quiet')
+                if x == True:
+                    sample.Indikator3 = x
+            print(str(sample.Indikator3))
+            
+    def Indikator4(self):
+        for sample in self.malware_samples:
+            print(sample.path)
+            for subject in sample.report.analysis_subjects:
+                x = subject.indikatorFour()
+                if x == True:
+                    sample.Indikator4 = x
+            print(str(sample.Indikator4))
+                
+        
+    def Inidkator5(self):
+        x = ['xpsp2res.dll', 'cryptsp.dll', 'ntoskrnl.exe', 'jqs.exe']
+        for sample in self.malware_samples:
+            a = sample.IndikatorFive(x)
+            print(sample.path)
+            print(str(a))
             
     
-    
-            
+        
                         
 
 class Sample:
-    
-    
     def __init__(self, path):
         self.path = path
+        self.Indikator1 = False
+        self.Indikator2 = False
+        self.Indikator3 = False
+        self.Indikator4 = False
+
         with open(path, 'r') as json_data :
             self.file = json.load(json_data)
             self.report = Report(self.file['report'])
@@ -79,7 +125,16 @@ class Sample:
         else:
             return True 
         
-        
+    def IndikatorFive(self, x):
+        y = x
+        for subject in self.report.analysis_subjects:
+            a = subject.indikatorFive(y)
+            if a == 'null':
+                continue
+            y.remove(a)
+        if (len(x) - len(y)) > 3:
+            return True 
+        return False
     
 
 class Report:
@@ -114,7 +169,7 @@ class Report:
             else:
                 continue
         return False
-    
+
             
         
         
@@ -172,40 +227,108 @@ class Subject:
             else:
                 continue
         return False 
+    
+    def indikatorOne(self):
+        if self.file_writes == 'null':
+            return -1 
+        x = 0
+        for write in self.file_writes:
+            default = 'null'
+            filename = write.get('filename', default)
+            if not '.dll' in filename:
+                x += 1
+        return x        
+        
+    def indikatorThree(self, arg):
+        if self.process_interactions == 'null':
+            return False
+        default = 'null'
+        for interaction in self.process_interactions:
+            argument = interaction.get('arguments', default)
+            if arg in argument:
+                return True
+        return False
+        
+    def indikatorFour(self):
+        if self.file_writes == 'null':
+            return False
+        for write in self.file_writes:
+            default = 'null'
+            pe_info = write.get('static_pe_information', default)
+            if pe_info != 'null':
+                time = pe_info.get('compile_timestamp', default)
+                year = int(time[0:4])
+                if year < 2000:
+                    return True
             
-        
-        
-        
+            
+    
+    def indikatorFive(self, processes):
+        if self.loaded_libraries == 'null' :
+            return 'null'
+        default = 'null'
+        x = 0
+        for lib in self.loaded_libraries:
+            filename = lib.get('filename', default)
+            if filename == 'null':
+                continue
+            for proc in processes:
+                if proc in filename:
+                    print(proc)
+                    return proc 
+        return 'null'
     
         
 
-#analyzer = Analyzer('C:/Users/esy2053/Documents/Lastline_report')
-#analyzer.IndiaktorUsedRegisry('CURRENTVERSION\RUN')
-
+analyzer = Analyzer('C:/Users/esy2053/Documents/Lastline_report')
+analyzer.Indikator4()
 #sample = Sample('C:/Users/esy2053/Documents/Lastline_report/data (2).json')
 #sample.report.checkReportForRegistry('CURRENTVERSION\RUN')
 #[a-zA-Z].*\d+.*[a-zA-Z]\.exe
 
 
-sample = Sample('C:/Users/esy2053/Documents/Lastline_report/data (2).json')
-x = sample.report.checkReportSusFileWrites()
-print(str(x))
-
 def suspiciousName(name):
-    if len(name) > 5:
-        if re.search(r".*\\[a-zA-Z].*\d+[a-zA-Z]+.*", name):
-            if '32' in name:
-                return False
-            return True
-        else:
-            return False
+    #exe several times 
+    str = '.exe' 
+    x = name.count(str)
+    if x >= 2:
+        return True
+    #more than 4 ' ' in string
+    str = ' '
+    x = name.count(str)
+    if x >= 4 :
+        return True 
+    return False 
+    
 
+#sample = Sample('C:/Users/esy2053/Documents/Lastline_report/rootkit.exe.json')
+#x = ['xpsp2res.dll', 'cryptsp.dll', 'ntoskrnl.exe', 'jqs.exe']
+#for subject in sample.report.analysis_subjects:
+#    a = subject.indikatorFive(x)
+#    if a == 'null':
+#        continue
+#    x.remove(a)
+    
+    
+#for subject in sample.report.analysis_subjects:
+#    subject.indikatorThree()
+#x = sample.report.analysis_subjects[0]
+#print(str(x))
+
+    
 
         
         
 #s = 'C:\\Windows'
 #x = suspiciousName(s)
 #print(str(x))
+
+
+
+
+
+
+
 
 
 
